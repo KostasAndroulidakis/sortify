@@ -14,7 +14,9 @@ std::vector<Peak> extractPeaks(const Spectrogram& spectrogram) {
     const unsigned int numTimeWindows = spectrogram[0].size();
     
     // Define logarithmic frequency bands (Hz)
-    // These bands mimic human ear sensitivity
+    // These bands mimic human ear sensitivity which is more sensitive to
+    // changes in lower frequencies than higher ones
+    // The bands are distributed logarithmically across the spectrum
     const std::vector<std::pair<unsigned int, unsigned int>> freqBands = {
         {0, static_cast<unsigned int>(numFreqBins * 0.1)},         // ~0-500 Hz
         {static_cast<unsigned int>(numFreqBins * 0.1), 
@@ -54,6 +56,9 @@ std::vector<Peak> extractPeaks(const Spectrogram& spectrogram) {
         }
         
         // Calculate dynamic threshold as average of the band peaks
+        // Dynamic thresholding adapts to the audio's overall volume and
+        // spectral characteristics, improving fingerprint robustness across
+        // different recording conditions
         float avgMagnitude = 0.0f;
         for (const auto& peak : bandPeaks) {
             avgMagnitude += peak.magnitude;

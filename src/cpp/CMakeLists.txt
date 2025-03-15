@@ -8,15 +8,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(FFTW3_INCLUDE_DIRS "/opt/homebrew/include")
 set(FFTW3_LIBRARIES "/opt/homebrew/lib/libfftw3f.dylib")
 
-# Set libsndfile paths explicitly for Apple Silicon Mac
-set(SNDFILE_INCLUDE_DIRS "/opt/homebrew/include")
-set(SNDFILE_LIBRARIES "/opt/homebrew/lib/libsndfile.dylib")
+# libsndfile will be needed for audio file reading, but not included yet
 
 # Add include directories
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${FFTW3_INCLUDE_DIRS}
-    ${SNDFILE_INCLUDE_DIRS}
 )
 
 # Add the audio fingerprinting library

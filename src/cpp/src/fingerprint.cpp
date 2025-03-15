@@ -17,6 +17,8 @@ std::unordered_map<uint32_t, std::vector<FingerprintHash>> createFingerprint(
     }
     
     // Parameters for target zone
+    // The target zone defines a time-frequency area where we look for peaks to pair with our anchor
+    // This constellation approach makes the fingerprint robust to noise and distortion
     const float targetTimeRange = 3.0f;     // Look for targets within 3 time units
     const float minTargetTimeDelta = 0.5f;  // Minimum time between anchor and target
     const float maxFreqDelta = 30.0f;       // Maximum frequency difference
@@ -42,6 +44,11 @@ std::unordered_map<uint32_t, std::vector<FingerprintHash>> createFingerprint(
             
             // Generate 32-bit hash from anchor/target pair
             // Combine anchor frequency, target frequency, and time delta
+            // 32-bit hash structure:
+            // - Bits 22-31 (10 bits): Anchor frequency (0-1023)
+            // - Bits 12-21 (10 bits): Target frequency (0-1023)
+            // - Bits 0-11  (12 bits): Time delta * 10 (0-4095)
+            // 
             // The bit shifts and masks ensure each component has its own range in the hash
             uint32_t hash = (static_cast<uint32_t>(anchor.frequency) & 0x3FF) << 22 |
                            (static_cast<uint32_t>(target.frequency) & 0x3FF) << 12 |
