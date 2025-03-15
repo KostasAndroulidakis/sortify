@@ -23,11 +23,11 @@ add_library(audio_fingerprint STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/cpp/src/peak_extraction.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/cpp/src/fingerprint.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/cpp/src/logger.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/cpp/src/audio_reader.cpp
 )
 
 # Add include directories
 include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/cpp/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/cpp/include
     ${FFTW3_INCLUDE_DIRS}
 )

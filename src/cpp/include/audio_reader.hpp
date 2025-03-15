@@ -1,5 +1,5 @@
-#ifndef AUDIO_READER_H
-#define AUDIO_READER_H
+#ifndef AUDIO_READER_HPP
+#define AUDIO_READER_HPP
 
 #include <vector>
 #include <string>
@@ -9,9 +9,15 @@
 #include <algorithm>
 #include <cmath>
 
+namespace sortify {
+namespace audio {
+
 /**
- * A simplified audio file reader for testing purposes
- * Currently supports only WAV files, just enough for our tests
+ * @class AudioReader
+ * @brief Utility class for loading audio files in various formats
+ * 
+ * This class provides methods to load audio samples from WAV files directly,
+ * and from other formats (MP3, M4A, etc.) via FFmpeg conversion.
  */
 class AudioReader {
 public:
@@ -335,4 +341,7 @@ private:
     }
 };
 
-#endif // AUDIO_READER_H
+} // namespace audio
+} // namespace sortify
+
+#endif // AUDIO_READER_HPP

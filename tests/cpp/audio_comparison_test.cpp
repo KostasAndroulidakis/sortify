@@ -5,14 +5,14 @@
 #include <stdexcept>
 #include "audio_fingerprint.hpp"
 
-// Include our simplified audio file reader
-#include "AudioReader.h"
+// Include our audio file reader
+#include "audio_reader.hpp"
 
 // Helper function to load audio samples from a file
 std::vector<float> loadAudioFile(const std::string& filePath) {
     try {
         // Use FFmpeg-based loader for cross-format compatibility
-        return AudioReader::loadAudioFile(filePath);
+        return sortify::audio::AudioReader::loadAudioFile(filePath);
     } catch (const std::exception& e) {
         std::cerr << "Exception loading audio file: " << e.what() << std::endl;
         return {};
