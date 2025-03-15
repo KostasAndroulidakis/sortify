@@ -8,20 +8,23 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(FFTW3_INCLUDE_DIRS "/opt/homebrew/include")
 set(FFTW3_LIBRARIES "/opt/homebrew/lib/libfftw3f.dylib")
 
+# Set libsndfile paths explicitly for Apple Silicon Mac
+set(SNDFILE_INCLUDE_DIRS "/opt/homebrew/include")
+set(SNDFILE_LIBRARIES "/opt/homebrew/lib/libsndfile.dylib")
+
 # Add include directories
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${FFTW3_INCLUDE_DIRS}
+    ${SNDFILE_INCLUDE_DIRS}
 )
 
 # Add the audio fingerprinting library
 add_library(audio_fingerprint
-    src/audio_fingerprint.cpp
+    src/spectrogram.cpp
+    src/peak_extraction.cpp
+    src/fingerprint.cpp
 )
 
 # Link FFTW library
 target_link_libraries(audio_fingerprint ${FFTW3_LIBRARIES})
-
-# Create a simple test executable
-add_executable(fingerprint_test tests/fingerprint_test.cpp)
-target_link_libraries(fingerprint_test audio_fingerprint ${FFTW3_LIBRARIES})

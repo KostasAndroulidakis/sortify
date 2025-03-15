@@ -21,25 +21,3 @@ The project uses a multi-language architecture:
 ## Status
 
 This project is in early development.
-
-## Building
-
-### Dependencies
-
-- FFTW3: High-performance FFT library
-  - macOS: `brew install fftw`
-  - Ubuntu/Debian: `sudo apt-get install libfftw3-dev`
-  - Windows: Download from [FFTW official website](http://www.fftw.org/)
-
-### Compiling C++ components
-
-```bash
-cd src/cpp
-mkdir build && cd build
-cmake ..
-make
-```
-
-## License
-
-MIT
