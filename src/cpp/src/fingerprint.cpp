@@ -6,15 +6,23 @@
 namespace sortify {
 namespace audio {
 
-std::unordered_map<uint32_t, std::vector<FingerprintHash>> createFingerprint(
+Result<std::unordered_map<uint32_t, std::vector<FingerprintHash>>> createFingerprint(
     const std::vector<Peak>& peaks, 
     int songId
 ) {
     std::unordered_map<uint32_t, std::vector<FingerprintHash>> fingerprint;
     
     if (peaks.empty()) {
-        return fingerprint;
+        return Result<std::unordered_map<uint32_t, std::vector<FingerprintHash>>>::createFailure(
+            "Empty peaks vector provided");
     }
+    
+    if (songId < 0) {
+        return Result<std::unordered_map<uint32_t, std::vector<FingerprintHash>>>::createFailure(
+            "Invalid song ID: " + std::to_string(songId));
+    }
+    
+    Logger::info("Creating fingerprint with " + std::to_string(peaks.size()) + " peaks");
     
     // Parameters for target zone
     // The target zone defines a time-frequency area where we look for peaks to pair with our anchor
@@ -67,7 +75,14 @@ std::unordered_map<uint32_t, std::vector<FingerprintHash>> createFingerprint(
         }
     }
     
-    return fingerprint;
+    if (fingerprint.empty()) {
+        return Result<std::unordered_map<uint32_t, std::vector<FingerprintHash>>>::createFailure(
+            "Failed to create any fingerprint hashes");
+    }
+    
+    Logger::info("Created fingerprint with " + std::to_string(fingerprint.size()) + " unique hashes");
+    
+    return Result<std::unordered_map<uint32_t, std::vector<FingerprintHash>>>::createSuccess(std::move(fingerprint));
 }
 
 } // namespace audio

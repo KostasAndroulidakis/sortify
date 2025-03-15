@@ -5,13 +5,17 @@
 namespace sortify {
 namespace audio {
 
-std::vector<Peak> extractPeaks(const Spectrogram& spectrogram) {
+Result<std::vector<Peak>> extractPeaks(const Spectrogram& spectrogram) {
     if (spectrogram.empty() || spectrogram[0].empty()) {
-        return std::vector<Peak>();
+        return Result<std::vector<Peak>>::createFailure("Empty spectrogram provided");
     }
     
     const unsigned int numFreqBins = spectrogram.size();
     const unsigned int numTimeWindows = spectrogram[0].size();
+    
+    Logger::info("Extracting peaks from spectrogram: " + 
+                std::to_string(numFreqBins) + "x" + 
+                std::to_string(numTimeWindows));
     
     // Define logarithmic frequency bands (Hz)
     // These bands mimic human ear sensitivity which is more sensitive to
@@ -29,6 +33,21 @@ std::vector<Peak> extractPeaks(const Spectrogram& spectrogram) {
          static_cast<unsigned int>(numFreqBins * 0.8)},            // ~4000-4500 Hz
         {static_cast<unsigned int>(numFreqBins * 0.8), numFreqBins} // ~4500-5000 Hz
     };
+    
+    // Validate frequency bands
+    for (const auto& band : freqBands) {
+        if (band.first >= band.second) {
+            return Result<std::vector<Peak>>::createFailure("Invalid frequency band: [" + 
+                                                    std::to_string(band.first) + ", " + 
+                                                    std::to_string(band.second) + "]");
+        }
+        
+        if (band.second > numFreqBins) {
+            return Result<std::vector<Peak>>::createFailure("Frequency band exceeds spectrogram size: " + 
+                                                    std::to_string(band.second) + " > " + 
+                                                    std::to_string(numFreqBins));
+        }
+    }
     
     std::vector<Peak> peaks;
     
@@ -55,6 +74,10 @@ std::vector<Peak> extractPeaks(const Spectrogram& spectrogram) {
             }
         }
         
+        if (bandPeaks.empty()) {
+            continue;  // No peaks found in this time window
+        }
+        
         // Calculate dynamic threshold as average of the band peaks
         // Dynamic thresholding adapts to the audio's overall volume and
         // spectral characteristics, improving fingerprint robustness across
@@ -73,7 +96,13 @@ std::vector<Peak> extractPeaks(const Spectrogram& spectrogram) {
         }
     }
     
-    return peaks;
+    if (peaks.empty()) {
+        return Result<std::vector<Peak>>::createFailure("No significant peaks found in spectrogram");
+    }
+    
+    Logger::info("Extracted " + std::to_string(peaks.size()) + " peaks");
+    
+    return Result<std::vector<Peak>>::createSuccess(std::move(peaks));
 }
 
 } // namespace audio

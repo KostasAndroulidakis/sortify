@@ -34,10 +34,11 @@ std::vector<float> createHammingWindow(unsigned int size) {
  * FFTW is used because it's one of the fastest FFT implementations available.
  * 
  * @param x Input/output vector of complex values, modified in-place with FFT result
+ * @return True if successful, false if an error occurred
  */
-void fft(std::vector<std::complex<float>>& x) {
+bool fft(std::vector<std::complex<float>>& x, std::string& errorMessage) {
     const size_t N = x.size();
-    if (N <= 1) return;
+    if (N <= 1) return true;  // Nothing to do for tiny arrays
     
     // Allocate input/output arrays for FFTW
     // Using FFTW's allocation functions ensures proper memory alignment for SIMD operations
@@ -46,10 +47,11 @@ void fft(std::vector<std::complex<float>>& x) {
     
     // Check for allocation failure
     if (!in || !out) {
-        // Clean up and return without transformation
+        // Clean up and return error
         if (in) fftwf_free(in);
         if (out) fftwf_free(out);
-        return;
+        errorMessage = "Memory allocation failed for FFT";
+        return false;
     }
     
     // Copy input data
@@ -62,6 +64,14 @@ void fft(std::vector<std::complex<float>>& x) {
     // FFTW_ESTIMATE flag quickly creates a reasonable but non-optimal plan
     // FFTW_FORWARD indicates we're transforming from time domain to frequency domain
     fftwf_plan plan = fftwf_plan_dft_1d(N, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+    
+    if (!plan) {
+        fftwf_free(in);
+        fftwf_free(out);
+        errorMessage = "Failed to create FFT plan";
+        return false;
+    }
+    
     fftwf_execute(plan);
     
     // Copy result back to input vector
@@ -73,6 +83,8 @@ void fft(std::vector<std::complex<float>>& x) {
     fftwf_destroy_plan(plan);
     fftwf_free(in);
     fftwf_free(out);
+    
+    return true;
 }
 
 /**
@@ -85,9 +97,9 @@ void fft(std::vector<std::complex<float>>& x) {
  * 4. Extract magnitude information for each frequency bin
  * 5. Focus only on the desired frequency range (20Hz-5kHz)
  * 
- * @return A 2D matrix with frequencies as rows and time windows as columns
+ * @return A Result containing a 2D matrix with frequencies as rows and time windows as columns
  */
-Spectrogram generateSpectrogram(
+Result<Spectrogram> generateSpectrogram(
     const std::vector<AudioSample>& samples,
     unsigned int sampleRate,
     unsigned int windowSize,
@@ -96,7 +108,28 @@ Spectrogram generateSpectrogram(
     float maxFreq
 ) {
     if (samples.empty()) {
-        return Spectrogram();
+        return Result<Spectrogram>::createFailure("Empty audio samples provided");
+    }
+    
+    // Validate parameters
+    if (sampleRate == 0) {
+        return Result<Spectrogram>::createFailure("Sample rate cannot be zero");
+    }
+    
+    if (windowSize == 0) {
+        return Result<Spectrogram>::createFailure("Window size cannot be zero");
+    }
+    
+    if (overlap < 0.0f || overlap >= 1.0f) {
+        return Result<Spectrogram>::createFailure("Overlap must be between 0.0 and 1.0 (exclusive)");
+    }
+    
+    if (minFreq < 0.0f) {
+        return Result<Spectrogram>::createFailure("Minimum frequency cannot be negative");
+    }
+    
+    if (maxFreq <= minFreq) {
+        return Result<Spectrogram>::createFailure("Maximum frequency must be greater than minimum frequency");
     }
     
     // Calculate step size between windows based on overlap
@@ -105,6 +138,9 @@ Spectrogram generateSpectrogram(
     
     // Calculate number of windows
     unsigned int numWindows = (samples.size() - windowSize) / stepSize + 1;
+    if (numWindows == 0) {
+        return Result<Spectrogram>::createFailure("Sample size too small for given window size");
+    }
     
     // Create Hamming window
     std::vector<float> hammingWindow = createHammingWindow(windowSize);
@@ -119,10 +155,21 @@ Spectrogram generateSpectrogram(
     // Ensure valid bin range
     minBin = std::max(minBin, 0u);
     maxBin = std::min(maxBin, windowSize / 2u);
+    
+    if (maxBin <= minBin) {
+        return Result<Spectrogram>::createFailure("Invalid frequency range for given window size and sample rate");
+    }
+    
     unsigned int numBins = maxBin - minBin + 1;
     
     // Initialize spectrogram
     Spectrogram spectrogram(numBins, std::vector<float>(numWindows, 0.0f));
+    
+    // Log progress
+    Logger::info("Generating spectrogram: " + std::to_string(numWindows) + " windows, " +
+                 std::to_string(numBins) + " frequency bins");
+    
+    std::string fftError;
     
     // Process each window
     for (unsigned int windowIdx = 0; windowIdx < numWindows; ++windowIdx) {
@@ -139,7 +186,9 @@ Spectrogram generateSpectrogram(
         }
         
         // Apply FFT
-        fft(windowSamples);
+        if (!fft(windowSamples, fftError)) {
+            return Result<Spectrogram>::createFailure("FFT error: " + fftError);
+        }
         
         // Extract magnitude for the frequency bins we care about
         for (unsigned int binIdx = 0; binIdx < numBins; ++binIdx) {
@@ -156,7 +205,15 @@ Spectrogram generateSpectrogram(
         }
     }
     
-    return spectrogram;
+    if (spectrogram.empty() || spectrogram[0].empty()) {
+        return Result<Spectrogram>::createFailure("Failed to generate spectrogram data");
+    }
+    
+    Logger::info("Spectrogram generation complete: " + 
+                std::to_string(spectrogram.size()) + "x" + 
+                std::to_string(spectrogram[0].size()));
+    
+    return Result<Spectrogram>::createSuccess(std::move(spectrogram));
 }
 
 } // namespace audio

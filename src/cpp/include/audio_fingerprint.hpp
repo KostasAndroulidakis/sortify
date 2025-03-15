@@ -16,6 +16,8 @@
 #include <complex>
 #include <cmath>
 #include <unordered_map>
+#include "logger.hpp"
+#include "result.hpp"
 
 namespace sortify {
 namespace audio {
@@ -34,15 +36,15 @@ using Spectrogram = std::vector<std::vector<float>>; // 2D matrix: rows=frequenc
  * @param overlap Overlap percentage between windows (0.0-1.0)
  * @param minFreq Minimum frequency to include (Hz)
  * @param maxFreq Maximum frequency to include (Hz)
- * @return 2D spectrogram where rows are frequencies and columns are time
+ * @return Result containing 2D spectrogram where rows are frequencies and columns are time
  */
-Spectrogram generateSpectrogram(
+Result<Spectrogram> generateSpectrogram(
     const std::vector<AudioSample>& samples,
     unsigned int sampleRate = 44100,
     unsigned int windowSize = 2048,
     float overlap = 0.5,
-    float minFreq = 20.0,
-    float maxFreq = 5000.0
+    float minFreq = 20.0f,
+    float maxFreq = 5000.0f
 );
 
 /**
@@ -62,9 +64,9 @@ struct Peak {
  * Extracts distinctive frequency peaks from a spectrogram
  * 
  * @param spectrogram 2D matrix representing the spectrogram
- * @return Vector of Peak structures representing the most distinctive points
+ * @return Result containing vector of Peak structures representing the most distinctive points
  */
-std::vector<Peak> extractPeaks(const Spectrogram& spectrogram);
+Result<std::vector<Peak>> extractPeaks(const Spectrogram& spectrogram);
 
 /**
  * @struct FingerprintHash
@@ -88,9 +90,9 @@ struct FingerprintHash {
  * 
  * @param peaks Vector of spectral peaks extracted from the audio
  * @param songId Identifier for the song being fingerprinted
- * @return Hashmap where keys are 32-bit hashes and values are vectors of hash metadata
+ * @return Result containing a hashmap where keys are 32-bit hashes and values are vectors of hash metadata
  */
-std::unordered_map<uint32_t, std::vector<FingerprintHash>> createFingerprint(
+Result<std::unordered_map<uint32_t, std::vector<FingerprintHash>>> createFingerprint(
     const std::vector<Peak>& peaks, 
     int songId
 );

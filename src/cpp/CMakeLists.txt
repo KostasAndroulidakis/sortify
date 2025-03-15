@@ -21,6 +21,7 @@ add_library(audio_fingerprint
     src/spectrogram.cpp
     src/peak_extraction.cpp
     src/fingerprint.cpp
+    src/logger.cpp
 )
 
 # Link FFTW library
