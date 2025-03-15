@@ -1,0 +1,9 @@
+refactor: Split audio_fingerprint.cpp into modular components
+
+Divided audio_fingerprint.cpp into three specialized files following Single Responsibility Principle:
+- spectrogram.cpp: Handles FFT and spectrogram generation
+- peak_extraction.cpp: Manages frequency peak detection
+- fingerprint.cpp: Creates searchable audio fingerprints
+
+Updated CMakeLists.txt to include the new files.
+Removed original monolithic implementation.
