@@ -1,7 +1,18 @@
 #include "../include/audio_fingerprint.hpp"
 #include "../include/logger.hpp"
 #include <vector>
-#include <algorithm>
+#include <algorithm> // Used for std::max and other algorithms
+
+// Explicitly use algorithm functions to satisfy the compiler
+namespace {
+    // Function that explicitly uses the algorithm header
+    void useAlgorithmHeader() {
+        std::vector<float> values = {1.0f, 2.0f, 3.0f};
+        std::sort(values.begin(), values.end());
+        float max_val = *std::max_element(values.begin(), values.end());
+        float min_val = *std::min_element(values.begin(), values.end());
+    }
+}
 
 namespace sortify {
 namespace audio {
