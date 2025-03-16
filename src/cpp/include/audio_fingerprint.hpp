@@ -14,9 +14,7 @@
 
 #include <vector>
 #include <complex>
-#include <cmath>
 #include <unordered_map>
-#include "logger.hpp"
 #include "result.hpp"
 
 namespace sortify {

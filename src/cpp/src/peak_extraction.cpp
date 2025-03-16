@@ -1,4 +1,5 @@
 #include "../include/audio_fingerprint.hpp"
+#include "../include/logger.hpp"
 #include <vector>
 #include <algorithm>
 
