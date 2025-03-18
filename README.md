@@ -2,37 +2,85 @@
 
 Music organization tool with audio fingerprinting to identify duplicates across formats and quality levels. **This project is under active development and not yet ready for production use.**
 
+## Motivation
+
+My music folder is a mess. It has:
+- Duplicate files in different formats (mp3, wav, flac)
+- Files from different sources (CD rips, vinyl rips, downloads)
+- Missing or wrong metadata
+- Bad file names like "Track 02" or "Unknown Artist"
+
+I'm building Sortify to fix this by automatically organizing my music collection.
+
 ## Overview
 
-Sortify helps organize music collections by identifying and comparing music files across different formats and quality levels. The application detects duplicates, compares audio quality metrics, retrieves metadata, and provides playback functionality.
+Sortify is a desktop app that:
+- Finds duplicate songs using audio fingerprinting
+- Keeps the highest quality version of each song
+- Fixes missing and incorrect metadata
+- Plays your music
 
-## Progress
+## Program Logic
 
-- [X] Audio Fingerprinting (C++)
-  - [X] Function 1: generateSpectrogram - Convert raw audio to time-frequency representation
-  - [X] Function 2: extractPeaks - Extract distinctive frequency peaks from spectrogram
-  - [X] Function 3: createFingerprint - Generate fingerprint hashes from peak relationships
-- [ ] Audio quality comparison across formats
-- [ ] Web scraping for metadata and ISRC codes
-- [ ] Duplicate detection and management
-- [ ] Music player interface
-- [ ] Cross-platform compatibility
+Sortify processes music files in this order:
+
+1. **Scan music folder** - Collect basic file information
+2. **Audio fingerprinting** - Create unique identifiers for each song
+3. **Detect duplicates** - Group identical songs based on fingerprints
+4. **Compare audio quality** - Identify highest quality version of each song
+5. **Retrieve metadata** - Fetch accurate information for unique songs
+6. **Organize files** - Rename/move files based on metadata
+7. **Music playback** - Present organized library to user
 
 ## Architecture
 
-The project uses a multi-language architecture:
-- C++: Audio fingerprinting and DSP
-- Rust: Coordinator layer
-- Python: Metadata and web scraping
-- Swift/SwiftUI: Frontend UI and audio playback
+Sortify uses a multi-language architecture to leverage each language's strengths:
 
-## Status
+- **C++**: Audio analysis and fingerprinting
+  - High performance for DSP and audio processing
+  - Integration with audio libraries (FFTW)
 
-**Work in Progress**: This project is in early development with the following status:
+- **Rust**: Core coordinator and file system operations
+  - Memory safety and concurrency control
+  - Cross-platform file handling and system integration
+  - Efficient communication between components
 
-- Initial C++ audio fingerprinting engine is functional and tested
-- Architecture is defined but most components are not yet implemented
-- The application is not yet usable for end users
-- Development is ongoing - expect frequent changes
+- **Python**: Metadata and web services
+  - Rich ecosystem for web scraping and API integrations
+  - Data processing for metadata normalization
 
-Contributions and feedback are welcome, but please note that APIs and architecture may change significantly as development progresses.
+- **Swift/SwiftUI**: User interface
+  - Native macOS user experience
+  - Integration with system audio services
+
+## Progress
+
+- [X] C++ Components
+  - [X] Audio Fingerprinting (Step 2)
+    - [X] Function 1: generateSpectrogram - Convert raw audio to time-frequency representation
+    - [X] Function 2: extractPeaks - Extract distinctive frequency peaks from spectrogram
+    - [X] Function 3: createFingerprint - Generate fingerprint hashes from peak relationships
+  - [ ] Audio Quality Comparison (Step 4)
+
+- [ ] Rust Components
+  - [ ] Folder Scanning (Step 1)
+  - [ ] Duplicate Detection (Step 3)
+  - [ ] File Organization (Step 6)
+  - [ ] Cross-platform Coordinator
+
+- [ ] Python Components
+  - [ ] Metadata Retrieval (Step 5)
+    - [ ] Web scraping for accurate metadata
+    - [ ] ISRC code lookup
+    - [ ] Missing metadata recovery
+
+- [ ] Swift/SwiftUI Components
+  - [ ] Music Player Interface (Step 7)
+  - [ ] Library Visualization
+  - [ ] macOS Integration
+
+## Notes
+
+- **Development Status**: Early development with functional audio fingerprinting engine. Most components remain in planning stages.
+- **Platform Roadmap**: Initially targeting macOS, with Windows and Linux versions planned for future releases.
+- **Contributions**: Feedback and contributions welcome, though APIs and architecture may change significantly.
